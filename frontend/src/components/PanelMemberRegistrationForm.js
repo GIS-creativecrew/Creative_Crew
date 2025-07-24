@@ -1,0 +1,137 @@
+import React, { useState } from "react";
+import axios from "axios";
+import BASE_URL from "../utils/baseurl";
+import { Box, Button, TextField, Typography, Paper, MenuItem } from "@mui/material";
+
+const ROLES = ["Interviewer", "TA", "TA Lead"];
+
+const PanelMemberRegistrationForm = ({ onSuccess, buOptions = [] }) => {
+  const [form, setForm] = useState({
+    first_name: "",
+    last_name: "",
+    email_id: "",
+    phone_number: "",
+    role: "Interviewer",
+    bu_id: "",
+  });
+  const [message, setMessage] = useState("");
+  const [messageColor, setMessageColor] = useState("error");
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setMessage("");
+    try {
+      await axios.post(`${BASE_URL}/api/panel-members/register`, form);
+      setMessage("Panel member registered successfully!");
+      setMessageColor("success");
+      setForm({
+        first_name: "",
+        last_name: "",
+        email_id: "",
+        phone_number: "",
+        role: "Interviewer",
+        bu_id: "",
+      });
+      if (onSuccess) onSuccess();
+    } catch (err) {
+      setMessage(err.response?.data?.message || "Registration failed");
+      setMessageColor("error");
+    }
+  };
+
+  return (
+    <Box component={Paper} sx={{ p: 3, mb: 2, maxWidth: 400, mx: "auto" }}>
+      <Typography variant="h6" gutterBottom align="center" fontWeight={600}>
+        Register Panel Member
+      </Typography>
+      <form onSubmit={handleSubmit}>
+        <TextField
+          label="First Name"
+          name="first_name"
+          value={form.first_name}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <TextField
+          label="Last Name"
+          name="last_name"
+          value={form.last_name}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <TextField
+          label="Email"
+          name="email_id"
+          type="email"
+          value={form.email_id}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <TextField
+          label="Phone Number"
+          name="phone_number"
+          value={form.phone_number}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        />
+        <TextField
+          select
+          label="Role"
+          name="role"
+          value={form.role}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        >
+          {ROLES.map((role) => (
+            <MenuItem key={role} value={role}>
+              {role}
+            </MenuItem>
+          ))}
+        </TextField>
+        <TextField
+          select
+          label="Business Unit"
+          name="bu_id"
+          value={form.bu_id}
+          onChange={handleChange}
+          fullWidth
+          margin="normal"
+          required
+        >
+          {buOptions.map((bu) => (
+            <MenuItem key={bu.id} value={bu.id}>
+              {bu.name}
+            </MenuItem>
+          ))}
+        </TextField>
+        <Button
+          type="submit"
+          variant="contained"
+          sx={{ backgroundColor: "green", mt: 2 }}
+          fullWidth
+        >
+          Register
+        </Button>
+        <Typography color={messageColor} sx={{ mt: 2, textAlign: "center" }}>
+          {message}
+        </Typography>
+      </form>
+    </Box>
+  );
+};
+
+export default PanelMemberRegistrationForm;
